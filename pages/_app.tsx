@@ -1,4 +1,6 @@
 import { Box, ChakraProvider, Button, Spinner, Center } from '@chakra-ui/react'
+import { UserProvider } from '@supabase/supabase-auth-helpers/react';
+import { supabaseClient } from '@supabase/supabase-auth-helpers/nextjs';
 import type { AppProps } from 'next/app'
 import { useEffect, useState } from 'react'
 import { supabase } from '../utils/api'
@@ -20,7 +22,7 @@ function MyApp({ Component, pageProps }: AppProps) {
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       console.log(event)
       // handleAuthChange(event, session)
-      if (event === 'SIGNED_IN') {
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
         // console.log('signed in')
         //if signed in event fires fetch user from firebase
         checkUser(() => {
@@ -46,25 +48,32 @@ function MyApp({ Component, pageProps }: AppProps) {
     user_id: string,
     name: string,
     avatar: string,
-    email: string
+    email: string,
+    default_currency: string
 }
 
   async function checkUser(cb?: () => void) {
-    const user = await supabase.auth.user()
+
+    let res = await fetch('/api/auth/me')
+    let resData = await res.json()
+    let user = resData.user
+
     if (user) {
       let {id, email, last_sign_in_at, ...rest} = user
       // console.log(id);
       const {data: userData, error: userError} = await supabase.from<UserData>('users').select('*').eq('user_id', id)
       // console.log('user data', userData);
-      let name, avatar
+      let name, avatar, default_currency
       if (!userData || userData.length == 0) {
         name = '' 
         avatar = '' 
+        default_currency = '' 
       } else {
         name = userData[0].name
         avatar = userData[0].avatar
+        default_currency = userData[0].default_currency
       }
-      setUser({id, email, last_sign_in_at, name: name, avatar: avatar})
+      setUser({id, email, last_sign_in_at, name: name, avatar: avatar, default_currency})
       if (cb) {
         cb()
       }
@@ -74,7 +83,7 @@ function MyApp({ Component, pageProps }: AppProps) {
 
   useEffect(() => {
     if (!user) {
-      if (router.pathname == '/' || router.pathname == '/signup') {
+      if (router.pathname == '/' || router.pathname.includes('/signup')) {
         setHasPermission(true)
       } else {
         setHasPermission(false)
@@ -96,27 +105,33 @@ function MyApp({ Component, pageProps }: AppProps) {
 
   if (isLoading) {
     return <ChakraProvider theme={theme}>
+      <UserProvider supabaseClient={supabaseClient}>
       <Center mx='auto' maxW="xl" h='full'>
             <Spinner color="teal.500"/>
-            </Center>
+        </Center>
+      </UserProvider>
       </ChakraProvider>
   }
   
 
   if (!hasPermission) {
     return <ChakraProvider theme={theme}>
+      <UserProvider supabaseClient={supabaseClient}>
       <Box mx='auto' maxW="xl" h='full'>
             <Box>No permission <Button onClick={() => router.push('/')}>Back to login</Button></Box>
-      </Box>
+        </Box>
+        </UserProvider>
       </ChakraProvider>
 
   }
 
   return (
     <ChakraProvider theme={theme}>
+       <UserProvider supabaseClient={supabaseClient}>
       <Box mx='auto' maxW="xl" h='full'>
         <Component {...pageProps} />
-      </Box>
+        </Box>
+        </UserProvider>
     </ChakraProvider> 
   )
 }

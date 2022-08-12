@@ -9,7 +9,7 @@ const UserHeroSection = ({user}: {user: User | null}) => {
             <Avatar size="2xl" name={user?.name} src={user?.avatar} />
         </Center>
         <Center>
-            <Text fontWeight="bold" fontSize="2xl" color="gray.600">{user?.name}</Text>
+            <Text noOfLines={1} fontWeight="bold" fontSize="2xl" color="gray.600">{user?.name}</Text>
         </Center>
     </Stack>
 }

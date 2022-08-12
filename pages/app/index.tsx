@@ -8,11 +8,13 @@ import UserGroups from '../../components/homePage/UserGroups'
 import {IoIosLogOut} from 'react-icons/io'
 import {AiOutlinePlus} from 'react-icons/ai'
 import AppButton from '../../components/AppButton'
+import GroupDrawer from '../../components/homePage/GroupDrawer'
 
 const Home: NextPage = () => {
 
     const router = useRouter()
     const user = useStore(state => state.user)
+    const setGroupDrawerId = useStore(state => state.setGroupDrawerId)
 
     const logOut = async () => {
         await supabase.auth.signOut() 
@@ -24,18 +26,19 @@ const Home: NextPage = () => {
             <UserHeroSection user={user} />            
             <UserGroups />
 
-
             <HStack position="fixed" bottom="5px" left="0px" w="full">
                 <HStack maxW="xl" w="full" mx="auto" px="10px">
                 <AppButton onClick={logOut} rounded="full" w="50px" h="50px" bg="blue.500">
                     <IoIosLogOut style={{transform: 'scaleX(-1)', fontSize: '30px'}} />
                 </AppButton>
                 <Spacer />
-                <AppButton rounded="full" w="50px" h="50px" bg="blue.500">
+                <AppButton onClick={() => setGroupDrawerId('new')} rounded="full" w="50px" h="50px" bg="blue.500">
                     <AiOutlinePlus />
                 </AppButton>
                 </HStack>
             </HStack>
+
+            <GroupDrawer />
     </Box>
     )
 }

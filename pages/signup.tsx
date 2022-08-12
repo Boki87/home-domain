@@ -3,18 +3,21 @@ import type { NextPage } from "next";
 import NextLink from 'next/link'
 import {Box, Center, Stack, FormControl, Link, Text, InputGroup, InputLeftElement, Input, InputRightElement, Button} from '@chakra-ui/react'
 import {FaUserAlt, FaLock} from "react-icons/fa"
+import { useRouter } from 'next/router';
 import { supabase } from '../utils/api';
 import AppButton from '../components/AppButton'
 
 
 const SignUp: NextPage = () => {
 
+    const router = useRouter()
     const [isLoading, setIsLoading] = useState(false)
     const [form, setForm] = useState({
         email: '',
       password: '',
         password_confirm: ''
     })
+    const [emailDisabled, setEmailDisabled] = useState(false)
 
     function inputChangeHandler(e: SyntheticEvent) {
     let input = (e.target as HTMLInputElement)
@@ -26,22 +29,24 @@ const SignUp: NextPage = () => {
   }
 
 
+
+
   async function formSubmitHandler(e: SyntheticEvent) {
     e.preventDefault()
 
-    const { user, session, error } = await supabase.auth.signUp({
-      email:form.email,
-      password: form.password
-    })
+   //just create new user
+        const { user, session, error } = await supabase.auth.signUp({
+          email:form.email,
+          password: form.password
+        })
 
-    const { data, error: dataError } = await supabase.from('users').insert({
-      user_id: user?.id,
-      email: form.email,
-      name: '',
-      avatar: ''
-    })
-    // console.log(data);
-    // console.log(user, session, error)
+        const { data, error: dataError } = await supabase.from('users').insert({
+          user_id: user?.id,
+          email: form.email,
+          name: '',
+          avatar: ''
+        })
+
   }
 
     return (
@@ -56,7 +61,7 @@ const SignUp: NextPage = () => {
                     pointerEvents="none"
                     children={<FaUserAlt style={{color: 'var(--chakra-colors-gray-400)'}} />}
                   />
-                  <Input value={form.email} required name="email" onInput={inputChangeHandler} type="email" placeholder="email address" />
+                  <Input value={form.email} disabled={emailDisabled} required name="email" onInput={inputChangeHandler} type="email" placeholder="email address" />
                 </InputGroup>
               </FormControl>
             <FormControl>
