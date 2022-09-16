@@ -20,7 +20,6 @@ function MyApp({ Component, pageProps }: AppProps) {
   useEffect(() => {
     //supabase auth listener on authentication change
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log(event)
       // handleAuthChange(event, session)
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
         // console.log('signed in')
